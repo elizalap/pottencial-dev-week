@@ -18,13 +18,18 @@ public class PersonController : ControllerBase
    }
 
    [HttpGet]
-   public List<Pessoa> Get()
+   public ActionResult<List<Pessoa>> Get()
    {
       /*Pessoa pessoa = new Pessoa("eliza", 22, "12345678");
       Contrato novoContrato = new Contrato("abc", 50.46);
       pessoa.contratos.Add(novoContrato);
       */
-      return _context.Pessoas.Include(p => p.contratos).ToList();
+
+      var result = _context.Pessoas.Include(p => p.contratos).ToList();
+      if (!result.Any())
+         return NoContent();
+
+      return Ok(result);
    }
 
    [HttpPost]
@@ -44,7 +49,7 @@ public class PersonController : ControllerBase
       return "Dados do id " + id + " atualizados";
    }
 
-   // [HttpDelete("{id}")]
+   [HttpDelete("{id}")]
    // public string Delete([FromRoute] int id)
    // {
    //    var result = _context.Pessoas.SingleOrDefault(e => e.Id == id);
@@ -54,5 +59,11 @@ public class PersonController : ControllerBase
 
    //    return "Deletando pessoa de id " + id;
    // }
+
+   public IActionResult Delete([FromRoute] int id)
+   {
+      //IActionResult - permite retorna status HTTP de forma mais agigável
+      return NotFound();
+   }
 
 }
