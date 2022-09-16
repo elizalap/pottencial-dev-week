@@ -14,7 +14,8 @@ public class DatabaseContext : DbContext
    public DbSet<Pessoa> Pessoas { get; set; }
    public DbSet<Contrato> Contratos { get; set; }
 
-   //Adiciona configurações quando cria os modelos para passar para o banco de dados, 
+   //Adiciona configurações quando cria os modelos para passar para o banco
+   // de dados, 
    protected override void OnModelCreating(ModelBuilder builder)
    {
       //transforma a classe em uma entidade no banco de dados

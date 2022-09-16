@@ -1,8 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+using src.Persistance;
 using src.Models;
 
 using Microsoft.EntityFrameworkCore;
-using src.Persistance;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
+
+
 
 namespace src.Controllers;
 
@@ -33,37 +36,89 @@ public class PersonController : ControllerBase
    }
 
    [HttpPost]
-   public Pessoa Post([FromBody] Pessoa pessoa)
+   public ActionResult<Pessoa> Post([FromBody] Pessoa pessoa)
    {
-      _context.Pessoas.Add(pessoa);
-      _context.SaveChanges();
-      return pessoa;
+
+      try
+      {
+         _context.Pessoas.Add(pessoa);
+         _context.SaveChanges();
+      }
+      catch (System.Exception)
+      {
+         return BadRequest(new
+         {
+
+         });
+      }
+
+      return Created("Criado", pessoa);
    }
 
    [HttpPut("{id}")]
-   public string Update([FromRoute] int id, [FromBody] Pessoa pessoa)
+   public ActionResult<Object> Update(
+      [FromRoute] int id,
+      [FromBody] Pessoa pessoa
+      )
    {
-      _context.Pessoas.Update(pessoa);
-      _context.SaveChanges();
+      var result = _context.Pessoas.SingleOrDefault(e => e.Id == id);
 
-      return "Dados do id " + id + " atualizados";
+      if (result is null)
+      {
+         return NotFound(new
+         {
+            msg = "Registro não encontrado",
+            status = HttpStatusCode.NotFound
+         });
+      }
+
+
+      try
+      {
+         _context.Pessoas.Update(pessoa);
+         _context.SaveChanges();
+      }
+      catch (System.Exception)
+      {
+         return BadRequest(new
+         {
+            msg = "Houve erro ao enviar solicitação de atualização do Id "
+             + id,
+            status = HttpStatusCode.OK
+         });
+      }
+
+      return Ok(new
+      {
+         msg = "Houve erro ao enviar solicitação de atualização do Id "
+             + id,
+         status = HttpStatusCode.OK
+      });
    }
 
+
    [HttpDelete("{id}")]
-   // public string Delete([FromRoute] int id)
-   // {
-   //    var result = _context.Pessoas.SingleOrDefault(e => e.Id == id);
-
-   //    _context.Pessoas.Remove(result);
-   //    _context.SaveChanges();
-
-   //    return "Deletando pessoa de id " + id;
-   // }
-
-   public IActionResult Delete([FromRoute] int id)
+   public ActionResult<Object> Delete([FromRoute] int id)
    {
-      //IActionResult - permite retorna status HTTP de forma mais agigável
-      return NotFound();
+      var result = _context.Pessoas.SingleOrDefault(e => e.Id == id);
+
+      if (result is null)
+      {
+         return BadRequest(new
+         {
+            msg = "Conteúdo inexistente, solicitação inválida.",
+            status = HttpStatusCode.BadRequest
+         });
+      }
+
+      _context.Pessoas.Remove(result);
+      _context.SaveChanges();
+
+      return Ok(new
+      {
+         msg = "Deletando pessoa de Id " + id,
+         status = HttpStatusCode.OK
+      });
    }
 
 }
